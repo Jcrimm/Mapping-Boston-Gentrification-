@@ -27,20 +27,32 @@ tracts = boston["TRACT"].to_list()
 #this will be handy for when we make the API requests
 tract_string = ",".join(tracts)
 
+#%% Bring in Variables of interest
+table = pd.read_csv("ACS2020_Table_Shells.csv",dtype=str)
+table = table.rename(columns={"Table ID":"table_ID","Unique ID":"unique_ID"})
+#Variables of interest (Table Shells)
+#"NAME"
+#""B01001_001E": total population
+#"B02001": Race (doesn't include Hispanic/Latino)
+#"B03002": Hispanic origin
+#"B19001" median income in the last 12 months
+#"B15003" educational attainment for population over 25
+#B25026 tenure for occupied units
+#"B25063" gross rent
+pop = table.query("unique_ID =='B01001_001'")
+race = table.query("table_ID == 'B02001'")
+hispanic = table.query("table_ID == 'B03002'")
+median_income = table.query("table_ID == 'B19001'")
+education = table.query("table_ID == 'B15003'")
+tenure = table.query("table_ID == 'B25026'")
+rent = table.query("table_ID == 'B25063'")
+
+
 #%% Create API request for 2020 ACS 5-year estimate
+
 
 # Trial import
 api = 'https://api.census.gov/data/2020/acs/acs5'
-#Variables of interest
-#"NAME"
-#""B01001_001E": total population
-#"B01001A_001E": white alone
-#"B01001B_001E" black alone
-#"B01001D_001E" asian alone
-#"B01001G_001E" two or more races
-#"B01001I_002E" hispanic alone
-#"B06011_001E" median income in the last 12 months
-#"B25113_001E" median gross rent by when person moved into unit
 
 #Select tracts of interest--only those in Boston! 
 for_clause = {"tract":tract_string}
