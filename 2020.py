@@ -40,32 +40,17 @@ tracts2010 = boston2010["TRACTCE10"].to_list()
 tract_string2010 = ",".join(tracts2010)
 
 
-#%% Bring in Variables of interest
+#%% Bring in Variables of interest excluding education
 
 #Variables of interest (Table Shells)
 #"NAME"
-#""B01001_001E": total population
-#"B03002_002" : Not Hispanic or Latino: White Alone
-#"B19013_001" median income in the last 12 months, inflation adjusted
-#"B15003" educational attainment for population over 25 (table ID)
-#"B25064_001": Median Rent
+#B01001_001E": total population
+#"B03002_002E" : Not Hispanic or Latino: White Alone
+#"B19013_001E" median income in the last 12 months, inflation adjusted
+#"B25064_001E": Median Rent
 
 #Create a list of all the variables we want, exluding education.
-var_list = ["NAME", "B01001_001E","B03002_002","B19013_001","B25064_001"]
-
-# For education, want the full table. Let's select all the variables using the table shell csv file
-table = pd.read_csv("ACS2020_Table_Shells.csv",dtype=str)
-#rename columns so they don't have spaces
-table = table.rename(columns={"Table ID":"table_ID","Unique ID":"unique_ID"})
-#select rows for educational attainment for populaton over 25
-education = table.query("table_ID == 'B15003'")
-#drop first two rows
-education = education.iloc[2:]
-#write the remaining variables to a list
-attainment = education["unique_ID"].to_list()
-
-#Join the education list onto var_list
-var_list.extend(attainment)
+var_list = ["NAME","B01001_001E","B03002_002E","B19013_001E","B25064_001E"]
 
 #create a string for all the variables
 var_string = ",".join(var_list)
@@ -81,9 +66,11 @@ api = 'https://api.census.gov/data/2020/acs/acs5'
 for_clause = {"tract":tract_string2010}
 
 #For the in clause, want Massachusetts and Suffolk County
-in_clause = "state:25 County:025"
+in_clause = "state:25 county:025"
+
 #put in census API key. 
 key_value = "0a95ea1ddf62885731b2000925bbf002a1a803c2"
+
 payload = {'get': var_string, 'for':for_clause,'in':in_clause,'key':key_value}
 response = requests.get(api,payload)
 
@@ -92,7 +79,7 @@ if response.status_code==200:
     print(f"Success!")
 else:
     print(response.status_code)
-    print(response.txt)
+    print(response.text)
     assert False
 
 #%%
@@ -108,12 +95,21 @@ datarows = row_list[1:]
 #Convert the data into a Pandas dataframe
 data2020 = pd.DataFrame(columns=colnames, data=datarows)
 
-#rename population and cars
+#rename columns
+columns2020 = {"B01001_001E":"pop2020","B03002_002E":"white2020","B19013_001E":"income2020","B25064_001E":"rent2020"}
+data2020 = data2020.rename(columns=columns2020)
+
+#set index to tract
+data2020.set_index("tract",inplace=True)
+
+#convert columns from strings to integers
+numbers = ["pop2020","white2020","income2020","rent2020"]
+data2020[numbers] = data2020[numbers].astype(int)
 
 
-#convert population and cars into integers
 
-#create cars per population
+
+
 
 
 
