@@ -106,9 +106,14 @@ data2020.set_index("tract",inplace=True)
 numbers = ["pop2020","white2020","income2020","rent2020"]
 data2020[numbers] = data2020[numbers].astype(int)
 
+#%%
+#Check how many tracts don't have any population
+missing = data2020.query("pop2020==0").count()
+print(f"Tracts with no population: {missing} \n")
 
-
-
+#negative income or rent
+negative = data2020.query("income2020<=0 and rent2020<=0")
+print(f"Tracts with negative income or rent: {negative.index} \n")
 
 
 
