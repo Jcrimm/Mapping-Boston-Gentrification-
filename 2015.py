@@ -12,19 +12,10 @@ import requests
 
 #%% Create API Request
 
-api = 'https://api.census.gov/data/2015/acs/acs5'
-
-#Select tracts of interest--only those in Boston! 
-for_clause = {"tract":tract_string2010}
-
-#For the in clause, want Massachusetts and Suffolk County
-in_clause = "state:25 county:025"
-
-#put in census API key. 
-key_value = "0a95ea1ddf62885731b2000925bbf002a1a803c2"
+api15 = 'https://api.census.gov/data/2014/acs/acs5'
 
 payload = {'get': var_string, 'for':for_clause,'in':in_clause,'key':key_value}
-response = requests.get(api,payload)
+response = requests.get(api15,payload)
 
 #check whether it worked
 if response.status_code==200:
@@ -44,15 +35,21 @@ colnames = row_list[0]
 datarows = row_list[1:]
 
 #Convert the data into a Pandas dataframe
-data2015 = pd.DataFrame(columns=colnames, data=datarows)
+data2014 = pd.DataFrame(columns=colnames, data=datarows)
 
 #rename columns
-columns2015 = {"B01001_001E":"pop2015","B03002_002E":"white2015","B19013_001E":"income2015","B25064_001E":"rent2015"}
-data2015 = data2015.rename(columns=columns2015)
+columns2014 = {"B01001_001E":"pop14","B03002_002E":"white14","B19013_001E":"income14","B25064_001E":"rent14"}
+data2014 = data2014.rename(columns=columns2014)
+
+#create GEOID
+data2014["GEOID"] =  data2014["state"] + data2014["county"] + data2014["tract"]
 
 #set index to tract
-data2015.set_index("tract",inplace=True)
+data2014.set_index("tract",inplace=True)
 
 #convert columns from strings to integers
-numbers = ["pop2015","white2015","income2015","rent2015"]
-data2015[numbers] = data2015[numbers].astype(int)
+numbers14 = ["pop14","white14","income14","rent14"]
+data2014[numbers14] = data2014[numbers14].astype(int)
+
+#%% Write to csv file
+data2014.to_csv("Suffolk_2014.csv")

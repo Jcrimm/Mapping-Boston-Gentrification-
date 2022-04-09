@@ -9,6 +9,7 @@ Created on Sat Apr  2 17:06:43 2022
 #Import modules
 import pandas as pd
 import requests
+import geopandas as gpd
 
 #%% Create a string that has all census tracts of interest (2020 tracts)
 
@@ -56,14 +57,16 @@ var_list = ["NAME","B01001_001E","B03002_002E","B19013_001E","B25064_001E"]
 var_string = ",".join(var_list)
 
 
-#%% Create API request for 2020 ACS 5-year estimate
+#%% Create API request for 2019 ACS 5-year estimate
 
 
 # Trial import
-api = 'https://api.census.gov/data/2020/acs/acs5'
+api = 'https://api.census.gov/data/2019/acs/acs5'
 
 #Select tracts of interest--only those in Boston! 
-for_clause = {"tract":tract_string2010}
+#for_clause = {"tract":tract_string2010}
+#other for_clause: all tracts in Suffolk County
+for_clause = "tract:*"
 
 #For the in clause, want Massachusetts and Suffolk County
 in_clause = "state:25 county:025"
@@ -93,27 +96,39 @@ colnames = row_list[0]
 datarows = row_list[1:]
 
 #Convert the data into a Pandas dataframe
-data2020 = pd.DataFrame(columns=colnames, data=datarows)
+data2019 = pd.DataFrame(columns=colnames, data=datarows)
 
 #rename columns
-columns2020 = {"B01001_001E":"pop2020","B03002_002E":"white2020","B19013_001E":"income2020","B25064_001E":"rent2020"}
-data2020 = data2020.rename(columns=columns2020)
+columns2019 = {"B01001_001E":"pop19","B03002_002E":"white19","B19013_001E":"income19","B25064_001E":"rent19"}
+data2019 = data2019.rename(columns=columns2019)
+
+#create GEOID
+data2019["GEOID"] =  data2019["state"] + data2019["county"] + data2019["tract"]
 
 #set index to tract
-data2020.set_index("tract",inplace=True)
+data2019.set_index("tract",inplace=True)
 
 #convert columns from strings to integers
-numbers = ["pop2020","white2020","income2020","rent2020"]
-data2020[numbers] = data2020[numbers].astype(int)
+numbers2019 = ["pop19","white19","income19","rent19"]
+data2019[numbers2019] = data2019[numbers2019].astype(int)
 
-#%%
+#%% Let's look for missing data
+
 #Check how many tracts don't have any population
-missing = data2020.query("pop2020==0").count()
-print(f"Tracts with no population: {missing} \n")
+missing = data2019.query("pop19==0").count()
+print(f"Tracts with no population: {missing['NAME']} \n")
 
 #negative income or rent
-negative = data2020.query("income2020<=0 and rent2020<=0")
-print(f"Tracts with negative income or rent: {negative.index} \n")
+negative = data2019.query("income19<=0 or rent19<=0")
+print(f"Tracts with negative income or rent: {negative['NAME'].count()} \n")
+
+#write negative to a csv file--let's map it
+negative.to_csv("negative2019.csv")
+
+#%% Write 2019 data to a csv file
+data2019.to_csv("Suffolk_2019.csv")
+
+
 
 
 
