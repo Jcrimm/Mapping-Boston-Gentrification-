@@ -12,31 +12,22 @@ import requests
 #%% Set up variable string for education 
 
 #"B15003" educational attainment for population over 25 (table ID)
+# "B15003_001E" : total
+# "B15003_022E" : bachelor's degree
+# "B15003_023E" : master's degree
+# "B15003_024E" : professional degree
+# "B15003_025E" : doctoral degree
 
-# For education, want the full table. Let's select all the variables using the table shell csv file
-table = pd.read_csv("ACS2020_Table_Shells.csv",dtype=str)
-#rename columns so they don't have spaces
-table = table.rename(columns={"Table ID":"table_ID","Unique ID":"unique_ID"})
-#select rows for educational attainment for populaton over 25
-education = table.query("table_ID == 'B15003'")
-#drop first two rows
-education = education.iloc[2:]
-#write the remaining variables to a list
-attain = education["unique_ID"].to_list()
+# create variable list
+attain_list = ["NAME","B15003_001E","B15003_022E","B15003_023E","B15003_024E","B15003_025E"]
+attain_string = ",".join(attain_list)
 
-#add "E" to to the end of each value in education
-attain = [n + "E" for n in attain]
+#%% Create API request for 2019 ACS
 
-#Add "NAME" to the list and then create a string for the api request
-attain = ["NAME"] + attain
-attain_string = ",".join(attain)
-
-#%% Create API request
-
-api = 'https://api.census.gov/data/2015/acs/acs5'
+api = 'https://api.census.gov/data/2019/acs/acs5'
 
 #Select tracts of interest--only those in Boston! 
-for_clause = {"tract":tract_string2010}
+for_clause = {"tract:*"}
 
 #For the in clause, want Massachusetts and Suffolk County
 in_clause = "state:25 county:025"
@@ -66,5 +57,31 @@ colnames = row_list[0]
 datarows = row_list[1:]
 
 #Convert the data into a Pandas dataframe
-educ2020 = pd.DataFrame(columns=colnames, data=datarows)
+educ19 = pd.DataFrame(columns=colnames, data=datarows)
+
+#rename columns
+attaincol19 = {"B15003_001E": "total19",
+           "B15003_022E": "bachelors19",
+           "B15003_023E":"masters19",
+           "B15003_024E": "professional19", 
+           "B15003_025E": "doctorate19"}
+educ19 = educ19.rename(columns=attaincol19)
+
+# convert columns into integers
+numbers = ["total19","bachelors19","masters19","professional19","doctorate19"]
+educ19[numbers] = educ19[numbers].astype(int)
+
+# calculate proportion of tract that has bachelor's degree or higher
+educ19["bachplus19"] = (educ19["bachelors19"] + educ19["masters19"] + educ19["professional19"] + educ19["doctorate19"])/educ19["total19"]
+
+#drop all number columns except proportion of tract with bachelors or higher
+educ19.drop(columns = numbers,inplace=True)
+
+#create GEOID
+educ19["GEOID"] = educ19["state"] + educ19["county"] + educ19["tract"]
+
+#write to CSV
+
+#%%
+
 
