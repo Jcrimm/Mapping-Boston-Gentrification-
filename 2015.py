@@ -9,6 +9,7 @@ Created on Wed Apr  6 18:56:23 2022
 #Import modules
 import pandas as pd
 import requests
+import numpy as np
 
 #%% Create API Request for 2014 ACS five year estimate
 
@@ -55,19 +56,26 @@ data2014["GEOID"] =  data2014["state"] + data2014["county"] + data2014["tract"]
 #set index to tract
 data2014.set_index("tract",inplace=True)
 
+##Convert all the missing data to nan
+data2014 = data2014.replace("-666666666",np.nan)
+
 #convert columns from strings to integers
 numbers = ["pop14","white14","income14","rent14","totaled","bachelors","masters","professional","doctorate"]
-data2014[numbers] = data2014[numbers].astype(int)
+data2014[numbers] = data2014[numbers].astype(float)
+
+#%%Calculate the percentage of each tract that's white
+
+data2014["pct_white_14"] = data2014["white14"]/data2014["pop14"]
 
 #%% calculate proportion of tract that has bachelor's degree or higher
 data2014["attain"] = data2014["bachelors"] + data2014["masters"] + data2014["professional"] + data2014["doctorate"]
 data2014["bachplus14"] = data2014["attain"]/data2014["totaled"]
 
 #drop all number columns except proportion of tract with bachelors or higher
-data2014.drop(columns = ["totaled","bachelors","masters","professional","doctorate","attain"] ,inplace=True)
+data2014.drop(columns = ["totaled","bachelors","masters","professional","doctorate","attain"],inplace=True)
 
 # reorder columns
-data2014 = data2014.reindex(columns = ["NAME", "pop14", "white14","income14","rent14","bachplus14","state","county","GEOID"])
+data2014 = data2014.reindex(columns = ["NAME", "pop14", "white14","pct_white_14","income14","rent14","bachplus14","state","county","GEOID"])
 
 #%% Write to csv file
 data2014.to_csv("Suffolk_2014.csv")
