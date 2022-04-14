@@ -68,8 +68,8 @@ quintiles = ["white_quint","inc_quint","rent_quint","educ_quint"]
 joined[quintiles] = joined[quintiles].astype(float)
 
 # first disregard any records that do not have a value for at least one of the quintiles
-bad_quintiles = joined[quintiles]
-if bad_quintiles==False:
+bad_recs = joined[quintiles].isnull()
+
     
     
 
