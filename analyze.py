@@ -44,6 +44,7 @@ joined["change_rent"] = 100*(joined["rent19"] - joined["rent14"])/joined["rent14
 joined["change_educ"] = 100*(joined["bachplus19"] - joined["bachplus14"])/joined["bachplus14"]
 
 #%% Keep just the change columns
+
 drop = ["pop19","white19","pct_white_19","income19","rent19","bachplus19","pop14","white14","pct_white_14","income14","rent14","bachplus14"]
 joined = joined.drop(columns=drop)
 
@@ -68,7 +69,9 @@ quintiles = ["white_quint","inc_quint","rent_quint","educ_quint"]
 joined[quintiles] = joined[quintiles].astype(float)
 
 # first disregard any records that do not have a value for at least one of the quintiles
-bad_recs = joined[quintiles].isnull()
+boolean = joined[quintiles].isnull()
+
+    
 
     
     

@@ -12,7 +12,7 @@ import requests
 import numpy as np
 
 
-#%% Bring in Variables of interest excluding education
+#%% Bring in Variables of interest
 
 #Variables of interest (Table Shells)
 #"NAME"
