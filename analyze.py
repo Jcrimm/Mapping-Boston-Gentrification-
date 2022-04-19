@@ -80,7 +80,9 @@ joined = joined.reset_index()
 keep_cols = ["GEOID","gent_index"]
 gent_by_id = joined[keep_cols]
 
-#%%
+#%% Write to csv
+
+gent_by_id.to_csv("gent_by_id.csv")
     
 
     
