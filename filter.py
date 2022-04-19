@@ -39,15 +39,27 @@ overlap_boston = overlaps.query("GEOID_right=='2507000'")
 
 #concacanate the two dataframes together
 #result is all tracts that are within or intersect with Boston
-tract_list = [within_boston,overlap_boston]
+#tract_list = [within_boston,overlap_boston]
 
-boston = pd.concat(tract_list)
+#boston = pd.concat(tract_list)
 
-boston = boston.reset_index()
-boston = boston.drop(columns="index")
+#boston = boston.reset_index()
+#boston = boston.drop(columns="index")
 
-#%%
-boston.to_file("boston.gpkg",layer="master",index=False)
+
+#%% Keep just the tracts from the tracts dataset
+keep = ["GEOID_left","ALAND_left","AWATER_left",'geometry']
+within_boston = within_boston[keep]
+
+#rename the columns
+within_boston = within_boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":"ALAND","AWATER_left":"AWATER"})
+
+
+#%% write to geopackage
+within_boston.to_file("within_boston.gpkg",layer="master",index=False)
+
+#this is for all tracts that are within and overlap Boston
+#boston.to_file("boston.gpkg",layer="master",index=False)
 
 #%% boston tracts
 tracts_boston = boston["TRACTCE"]
