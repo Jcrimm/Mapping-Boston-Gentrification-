@@ -68,9 +68,19 @@ joined["educ_quint"] = pd.qcut(joined["change_educ"],5,labels=[1,2,3,4,5])
 quintiles = ["white_quint","inc_quint","rent_quint","educ_quint"]
 joined[quintiles] = joined[quintiles].astype(float)
 
-# first disregard any records that do not have a value for at least one of the quintiles
-boolean = joined[quintiles].isnull()
+#create the gentrifcation index by summing the values from the quintiles
+joined["gent_index"] = joined["white_quint"] + joined["inc_quint"] + joined["rent_quint"] + joined["educ_quint"]
 
+#%% Drop variables we don't need anymore
+
+#reset index
+joined = joined.reset_index()
+
+#create list of columns we want to keep
+keep_cols = ["GEOID","gent_index"]
+gent_by_id = joined[keep_cols]
+
+#%%
     
 
     
