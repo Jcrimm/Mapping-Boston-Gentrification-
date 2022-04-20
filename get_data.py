@@ -10,7 +10,7 @@ Created on Wed Apr 20 09:35:00 2022
 import pandas as pd
 import requests
 
-#%% Bring in Variables of interest
+#%% Create string of variables of interest
 
 #Variables of interest (Table Shells)
 #"NAME"
@@ -31,14 +31,59 @@ var_list = ["NAME","B01001_001E","B03002_002E","B19013_001E","B25064_001E","B150
 #create a string for all the variables
 var_string = ",".join(var_list)
 
+#%% Create function for API requests and turning into dataframe
+
+def get(year):
+    api = f"https://api.census.gov/data/{year}/acs/acs5"
+    for_clause = "block group:*"
+    in_clause = "state:25 county:025"
+    key_value = "0a95ea1ddf62885731b2000925bbf002a1a803c2"
+    payload = {'get': var_string, 'for':for_clause,'in':in_clause,'key':key_value}
+    response = requests.get(api,payload)
+    if response.status_code==200:
+        print(f"Success!")
+    else:
+        print(response.status_code)
+        print(response.text)
+        assert False
+    row_list = response.json()
+    colnames = row_list[0]
+    datarows = row_list[1:]
+    year_data = pd.DataFrame(columns=colnames, data=datarows)
+    
+#%% Now run the function to get the 2014 and 2019 ACS five year estimate
+
+#This dictionary will be used to rename the columns
+col_names = {"B01001_001E":"pop",
+           "B03002_002E":"white",
+           "B19013_001E":"income",
+           "B25064_001E":"rent",
+           "B15003_001E": "totaled",
+           "B15003_022E": "bachelors",
+           "B15003_023E":"masters",
+           "B15003_024E": "professional", 
+           "B15003_025E": "doctorate"}
+
+#This list will be the columns no longer needed after creating the GEOID
+drop_cols = ["NAME","state","county","tract","block group"]
+
+#create a list of the years we want the five year ACS estimate for
+years = [2014,2019]
+
+for year in years:
+    year_data = get(year)
+    year = year.rename(columns=col_names)
+    year["GEOID"] = year["state"] + year["county"] + year["tract"] + year["block group"]
+    year = year.drop(columns=drop_cols)
+    year.set_index("GEOID",inplace=True)
+    year.to_file(f"Suffolk_blckgrps_{year}.csv",index=True)
+
 #%% Create API request for ACS five year estimate
 
 # Import
 api = 'https://api.census.gov/data/2019/acs/acs5'
 
-#Select tracts of interest--only those in Boston! 
-#for_clause = {"tract":tract_string2010}
-#other for_clause: all tracts in Suffolk County
+#for_clause--want all block groups
 for_clause = "block group:*"
 
 #For the in clause, want Massachusetts and Suffolk County
