@@ -63,14 +63,15 @@ else:
     print(response.text)
     assert False
 
-#%%
-#Set row list
+#%% Convert to a dataframe
+
+# Create a row list to hold all the data
 row_list = response.json()
 
-#Set colnames to the first row of row_list via row_list[0]
+#Set the first row to be variable/column names
 colnames = row_list[0]
 
-#Set datarows to the remaining rows via row_list[1:]
+#Set the rest of the rows to be observations
 datarows = row_list[1:]
 
 #Convert the data into a Pandas dataframe

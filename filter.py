@@ -9,8 +9,6 @@ Created on Wed Apr 13 15:22:05 2022
 import pandas as pd
 import geopandas as gpd
 
-utm18n = 26986
-
 #%% Read in files
 
 # read in places file
@@ -21,6 +19,9 @@ tracts = gpd.read_file("cb_2019_25_tract_500k.zip",dtype=str)
 
 
 #%% 
+
+# set the utm18n to 26986, the one used for Massachusetts 
+utm18n = 26986
 
 #project to the standard mass utm18n
 places = places.to_crs(epsg=utm18n)
