@@ -17,6 +17,9 @@ places = gpd.read_file("cb_2019_25_place_500k.zip",dtype=str)
 #bring in tracts data
 tracts = gpd.read_file("cb_2019_25_tract_500k.zip",dtype=str)
 
+#bring in block groups data
+block_grps = gpd.read_file("cb_2019_25_bg_500k.zip",dtype=str)
+
 
 #%% 
 
@@ -26,13 +29,17 @@ utm18n = 26986
 #project to the standard mass utm18n
 places = places.to_crs(epsg=utm18n)
 tracts = tracts.to_crs(epsg=utm18n)
+block_grps = block_grps.to_crs(epsg=utm18n)
 
 #spatial join
 #first do a spatial join of places onto tracts for any tracts that intersect
-overlaps = tracts.sjoin(places,how="left",predicate="overlaps")
+#overlaps = tracts.sjoin(places,how="left",predicate="overlaps")
+overlaps = block_grps.sjoin(places,how="left",predicate="overlaps")
+print(overlaps["STATEFP_right"].value_counts())
 
 #then do a spatial join for all tracts that are within places
-within = tracts.sjoin(places,how="left",predicate="within")
+within = block_grps.sjoin(places,how="left",predicate="within")
+print(within["STATEFP_right"].value_counts())
 
 #Select only the rows for Boston
 within_boston = within.query("GEOID_right=='2507000'")

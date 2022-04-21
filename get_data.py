@@ -50,6 +50,7 @@ def get(year):
     colnames = row_list[0]
     datarows = row_list[1:]
     year_data = pd.DataFrame(columns=colnames, data=datarows)
+    return year_data
     
 #%% Now run the function to get the 2014 and 2019 ACS five year estimate
 
@@ -70,13 +71,22 @@ drop_cols = ["NAME","state","county","tract","block group"]
 #create a list of the years we want the five year ACS estimate for
 years = [2014,2019]
 
+#create empty dataframe
+data = pd.DataFrame()
+
 for year in years:
     year_data = get(year)
-    year = year.rename(columns=col_names)
-    year["GEOID"] = year["state"] + year["county"] + year["tract"] + year["block group"]
-    year = year.drop(columns=drop_cols)
-    year.set_index("GEOID",inplace=True)
-    year.to_file(f"Suffolk_blckgrps_{year}.csv",index=True)
+    year_data = year_data.rename(columns=col_names)
+    year_data["GEOID"] = year_data["state"] + year_data["county"] + year_data["tract"] + year_data["block group"]
+    year_data = year_data.drop(columns=drop_cols)
+    year_data.set_index("GEOID",inplace=True)
+    year_data.to_csv(f"Suffolk_blckgrps_{year}.csv",index=True)
+
+#reset index
+#year_data.reset_index(inplace=True)
+#search for duplicates
+#dups = year_data.duplicated(subset="GEOID",keep='first')
+#print(dups.sum())
 
 #%% Create API request for ACS five year estimate
 

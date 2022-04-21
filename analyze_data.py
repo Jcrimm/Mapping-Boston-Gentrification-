@@ -46,6 +46,26 @@ joined = 100*(data19-data14)/data14
 
 #%%  Calculate quintiles for each column
 
+#create empty dataframe to hold the quintiles values
+quint = pd.DataFrame()
 
+#loop through the columns of joined creating quintiles for each variable
+for columns in joined:
+    quint[columns] = pd.qcut(joined[columns],5,labels=[1,2,3,4,5])
+    quint = quint.astype(float)
+
+#create the gentrification index
+#add the the values of each quintile to create a gentrification score
+quint["gent_index"] = quint["income"] + quint["rent"] + quint["pct_white"] + quint["high_ed"]
+
+#write to csv file
+quint.to_csv("gent_by_block_grp.csv")
+
+
+
+
+    
+    
+    
     
 
