@@ -56,7 +56,8 @@ for columns in joined:
 
 #create the gentrification index
 #add the the values of each quintile to create a gentrification score
-quint["gent_index"] = quint["income"] + quint["rent"] + quint["pct_white"] + quint["high_ed"]
+quint["gent_index(w/race)"] = quint["income"] + quint["rent"] + quint["pct_white"] + quint["high_ed"]
+quint["gent_index(norace)"] = quint["income"] + quint["rent"] + quint["high_ed"]
 
 #write to csv file
 quint.to_csv("gent_by_block_grp.csv")

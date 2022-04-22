@@ -12,10 +12,7 @@ import geopandas as gpd
 #%% Read in files
 
 # read in places file
-places = gpd.read_file("cb_2019_25_place_500k.zip",dtype=str)
-
-#bring in tracts data
-tracts = gpd.read_file("cb_2019_25_tract_500k.zip",dtype=str)
+city = gpd.read_file("cb_2019_25_place_500k.zip",dtype=str)
 
 #bring in block groups data
 block_grps = gpd.read_file("cb_2019_25_bg_500k.zip",dtype=str)
@@ -27,32 +24,42 @@ block_grps = gpd.read_file("cb_2019_25_bg_500k.zip",dtype=str)
 utm18n = 26986
 
 #project to the standard mass utm18n
-places = places.to_crs(epsg=utm18n)
-tracts = tracts.to_crs(epsg=utm18n)
+city = city.to_crs(epsg=utm18n)
 block_grps = block_grps.to_crs(epsg=utm18n)
 
 #spatial join
-#first do a spatial join of places onto tracts for any tracts that intersect
-#overlaps = tracts.sjoin(places,how="left",predicate="overlaps")
-overlaps = block_grps.sjoin(places,how="left",predicate="overlaps")
-print(overlaps["STATEFP_right"].value_counts())
+#first do a spatial join of city onto block_grps for any block_grps that intersect
+overlaps = block_grps.sjoin(city,how="left",predicate="overlaps")
 
-#then do a spatial join for all tracts that are within places
-within = block_grps.sjoin(places,how="left",predicate="within")
-print(within["STATEFP_right"].value_counts())
+#then do a spatial join for all block_grps that are within the city
+within = block_grps.sjoin(city,how="left",predicate="within")
 
-#Select only the rows for Boston
+#Select only the rows for Boston. How many in each group? 
 within_boston = within.query("GEOID_right=='2507000'")
+print(f"Number of Block groups within Boston: {len(within_boston)}")
 overlap_boston = overlaps.query("GEOID_right=='2507000'")
+print(f"Number of Block groups overlapping Boston: {len(overlap_boston)}")
 
 #concacanate the two dataframes together
 #result is all tracts that are within or intersect with Boston
-#tract_list = [within_boston,overlap_boston]
+tract_list = [within_boston,overlap_boston]
 
-#boston = pd.concat(tract_list)
+boston_grps = pd.concat(tract_list)
 
-#boston = boston.reset_index()
-#boston = boston.drop(columns="index")
+#intersect the city boundaries with the block groups file
+intersect = block_grps.sjoin(city,how="left",predicate="intersects")
+#select only those that intersect w/ Boston
+intersect = intersect.query("GEOID_right=='2507000'")
+
+#try two different clips
+#boston1 clips intersect with the city file
+boston1 = intersect.clip(city,keep_geom_type=True)
+#boston 2 clips the boston_grps with the city file
+boston2 = boston_grps.clip(city,keep_geom_type=True)
+
+#check that the boston_grps is the same length as boston
+print(f"Number of records in clipped data using intersection: {len(boston1)}")
+print (f"Number of records in clipped data using the concant: {len(boston2)}")
 
 
 #%% Keep just the tracts from the tracts dataset
@@ -66,12 +73,6 @@ within_boston = within_boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":
 #%% write to geopackage
 within_boston.to_file("within_boston.gpkg",layer="master",index=False)
 
-#this is for all tracts that are within and overlap Boston
-#boston.to_file("boston.gpkg",layer="master",index=False)
 
-#%% boston tracts
-tracts_boston = boston["TRACTCE"]
-print(len(tracts_boston))
-tracts_boston.to_csv("boston_tracts.csv")
 
 
