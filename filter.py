@@ -18,7 +18,7 @@ city = gpd.read_file("cb_2019_25_place_500k.zip",dtype=str)
 block_grps = gpd.read_file("cb_2019_25_bg_500k.zip",dtype=str)
 
 
-#%% 
+#%% Project the geographic data to the standard utn18n for massachusetts
 
 # set the utm18n to 26986, the one used for Massachusetts 
 utm18n = 26986
@@ -27,12 +27,15 @@ utm18n = 26986
 city = city.to_crs(epsg=utm18n)
 block_grps = block_grps.to_crs(epsg=utm18n)
 
+#%% Join the block groups and city geographic data
+#then clip the block group data on the city data to create the city boundary
+
 #spatial join
 #first do a spatial join of city onto block_grps for any block_grps that intersect
-overlaps = block_grps.sjoin(city,how="left",predicate="overlaps")
+overlaps = block_grps.sjoin(city,how="inner",predicate="overlaps")
 
 #then do a spatial join for all block_grps that are within the city
-within = block_grps.sjoin(city,how="left",predicate="within")
+within = block_grps.sjoin(city,how="inner",predicate="within")
 
 #Select only the rows for Boston. How many in each group? 
 within_boston = within.query("GEOID_right=='2507000'")
@@ -42,36 +45,27 @@ print(f"Number of Block groups overlapping Boston: {len(overlap_boston)}")
 
 #concacanate the two dataframes together
 #result is all tracts that are within or intersect with Boston
-tract_list = [within_boston,overlap_boston]
+blckgrp_list = [within_boston,overlap_boston]
+boston_grps = pd.concat(blckgrp_list)
 
-boston_grps = pd.concat(tract_list)
-
-#intersect the city boundaries with the block groups file
-intersect = block_grps.sjoin(city,how="left",predicate="intersects")
-#select only those that intersect w/ Boston
-intersect = intersect.query("GEOID_right=='2507000'")
-
-#try two different clips
-#boston1 clips intersect with the city file
-boston1 = intersect.clip(city,keep_geom_type=True)
-#boston 2 clips the boston_grps with the city file
-boston2 = boston_grps.clip(city,keep_geom_type=True)
-
-#check that the boston_grps is the same length as boston
-print(f"Number of records in clipped data using intersection: {len(boston1)}")
-print (f"Number of records in clipped data using the concant: {len(boston2)}")
+#boston clips the boston_grps with the city file
+boston = boston_grps.clip(city,keep_geom_type=True)
 
 
-#%% Keep just the tracts from the tracts dataset
+#%% Keep just the data from the block groups dataset and rename columns
 keep = ["GEOID_left","ALAND_left","AWATER_left",'geometry']
-within_boston = within_boston[keep]
+boston = boston[keep]
 
 #rename the columns
-within_boston = within_boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":"ALAND","AWATER_left":"AWATER"})
+boston = boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":"ALAND","AWATER_left":"AWATER"})
 
+#resent index and then set index to GEOID. Drop the old index 
+boston = boston.reset_index()
+boston.set_index("GEOID",inplace=True)
+boston = boston.drop(columns="index")
 
 #%% write to geopackage
-within_boston.to_file("within_boston.gpkg",layer="master",index=False)
+boston.to_file("boston.gpkg",layer="master",index=True)
 
 
 

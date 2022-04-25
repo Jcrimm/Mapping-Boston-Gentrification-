@@ -60,7 +60,7 @@ quint["gent_index(w/race)"] = quint["income"] + quint["rent"] + quint["pct_white
 quint["gent_index(norace)"] = quint["income"] + quint["rent"] + quint["high_ed"]
 
 #write to csv file
-quint.to_csv("gent_by_block_grp.csv")
+quint.to_csv("gent_by_block_grp.csv",index=True)
 
 
 
