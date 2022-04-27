@@ -44,13 +44,13 @@ overlap_boston = overlaps.query("GEOID_right=='2507000'")
 print(f"Number of Block groups overlapping Boston: {len(overlap_boston)}")
 
 #concacanate the two dataframes together
-#result is all tracts that are within or intersect with Boston
+#result is all tracts that are within or overlap with Boston
 blckgrp_list = [within_boston,overlap_boston]
 boston_grps = pd.concat(blckgrp_list)
 
+# Now clip the boston_grps on the city boundary data
 #boston clips the boston_grps with the city file
 boston = boston_grps.clip(city,keep_geom_type=True)
-
 
 #%% Keep just the data from the block groups dataset and rename columns
 keep = ["GEOID_left","ALAND_left","AWATER_left",'geometry']

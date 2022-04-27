@@ -71,9 +71,9 @@ drop_cols = ["NAME","state","county","tract","block group"]
 #create a list of the years we want the five year ACS estimate for
 years = [2014,2019]
 
-#create empty dataframe
-data = pd.DataFrame()
-
+#loop over each year
+#apply the get function, rename columns, create GEOID and drop columns not needed anymore
+#set index to GEOID and then save to a csv file
 for year in years:
     year_data = get(year)
     year_data = year_data.rename(columns=col_names)

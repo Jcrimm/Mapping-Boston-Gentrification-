@@ -22,14 +22,13 @@ boston = gpd.read_file("boston.gpkg",layer="master")
 
 merged = boston.merge(gent,
                       on="GEOID",
-                      how="outer",
+                      how="left",
                       validate="1:1",
                       indicator=True)
 
-print(merged["_merge"].value_counts())
+merged = merged.drop(columns="_merge")
 
-#merged = merged.drop(columns="_merge")
-
-#%% Write to geopackage
-merged.to_file("within_boston.gpkg",layer="gent",index=False)
+#%% Write to geopackage and csv
+merged.to_file("boston.gpkg",layer="gent",index=False)
+merged.to_csv("boston_gent.csv")
 
