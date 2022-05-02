@@ -34,9 +34,33 @@ gent["rank1"] = range(1,len(gent)+1)
 gent = gent.sort_values("gent_index(norace)")
 gent["rank2"] = range(1,len(gent)+1)
 
-#%% Now create relplot of both rankings to see if they match up
+#%% How are the two indexes correlated?
 
+#pearson
+trim = gent[['gent_index(w/race)','gent_index(norace)']]
+corr = trim.corr(method='pearson')
+
+#use spearman
+trim = gent[['rank1','rank2']]
+corr_spearman = trim.corr(method='spearman')
+
+#%% plot the correlation
 plt.rcParams['figure.dpi'] = 300
+
+fg = sns.regplot('rank1',
+            'rank2',
+            data=gent,
+            x_ci='ci',
+            ci=95)
+
+fg.set(xlabel='Gentrification Index with Race',
+       ylabel='Gentrification Index Without Race',
+       title='Correlation of Gentrification Indexes')
+
+fg.figure.tight_layout()
+fg.figure.savefig("Gent_Index_Regplot.png")
+
+#%% Now create relplot of both rankings to see if they match up
 
 fg = sns.relplot(data=gent,
                  x='rank1',
