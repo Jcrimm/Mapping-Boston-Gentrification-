@@ -39,10 +39,12 @@ gent["rank2"] = range(1,len(gent)+1)
 #pearson
 trim = gent[['gent_index(w/race)','gent_index(norace)']]
 corr = trim.corr(method='pearson')
+print(f"The Pearson Correlation btwn Indexes: {corr}")
 
 #use spearman
 trim = gent[['rank1','rank2']]
 corr_spearman = trim.corr(method='spearman')
+print(f"The Spearman Correlation btwn Indexes: {corr}")
 
 #%% plot the correlation
 plt.rcParams['figure.dpi'] = 300
@@ -59,29 +61,6 @@ fg.set(xlabel='Gentrification Index with Race',
 
 fg.figure.tight_layout()
 fg.figure.savefig("Gent_Index_Regplot.png")
-
-#%% Now create relplot of both rankings to see if they match up
-
-fg = sns.relplot(data=gent,
-                 x='rank1',
-                 y='rank2',
-                 palette="paired",
-                 facet_kws={'despine':False,"subplot_kws":{'title':'Scatter Gentrification Indexes'}})
-
-fg.set_axis_labels('Gentrification Index with Race','Gentrification Index Without Race')
-
-fg.tight_layout()
-fg.savefig('Gent_Index_relplot.png')
-
-#%% Create a scatterplot
-
-fig1,ax1 = plt.subplots()
-gent.plot.scatter("rank1","rank2",ax=ax1)
-ax1.set_xlabel('Gentrification Index with Race')
-ax1.set_ylabel('Gentrification Index Without Race')
-ax1.set_title('Correlation of Gentrification Indexes')
-fig1.tight_layout()
-fg.savefig('Gent_Index_scatter.png')
 
 
 
