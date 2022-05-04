@@ -27,6 +27,10 @@ utm18n = 26986
 city = city.to_crs(epsg=utm18n)
 block_grps = block_grps.to_crs(epsg=utm18n)
 
+
+#%% Keep just the boston city geography for the underlying layer
+city = city.query("GEOID =='2507000'")
+
 #%% Join the block groups and city geographic data
 #then clip the block group data on the city data to create the city boundary
 
@@ -65,6 +69,10 @@ boston.set_index("GEOID",inplace=True)
 boston = boston.drop(columns="index")
 
 #%% write to geopackage
+#write the city file to a geopackage for the underlayer
+city.to_file("boston.gpkg",layer="city")
+
+#write the filtered data down for merging later on
 boston.to_file("boston.gpkg",layer="master",index=True)
 
 
