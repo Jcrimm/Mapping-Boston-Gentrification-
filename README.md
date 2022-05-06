@@ -15,7 +15,7 @@ The data sources for this project include the Census's American Community Survey
 ## **Instructions**
 The scripts should be run in the order as indicated below. All geospatial data is provided within the repository, and the ACS data is retrieved in the first script through an API call. Other data files within the repository are created by the scripts and are provided for convenience. There is also a QGIS project within the repository which was used to create the maps.
 
-### **Script #1: get_data**
+### **Script #1: get**
 This script defines a function called get which makes the API request for the ACS five-year estimates and turns it into a dataframe. It then loops through the years of interest (the 2014 and 2019 ACS five year estimate) applying the get function, creates a GEOID and sets it as the index, and saves each year as a csv file for use in the next script.
 
 The API request calls the following variables for all block groups in Suffolk County, MA. These will be used to create the gentrification index. 
@@ -33,7 +33,7 @@ The function get takes one argument, year, and uses it to build and execute an A
 
 The script then loops through the years of interest, 2014 & 2019 in this case, renames the variables, builds a GEOID and writes the results to a csv files. The outputs of the script are two csv files, "Suffolk_blckgrps_2014.csv" and  "Suffolk_blckgrps_2019.csv." The two CSV files will be used in the next script. 
 
-### **Script #2: analyze_data**
+### **Script #2: analyze**
 The script uses the two csv files created in the previous script to build the gentrification index. It then saves the result as a new CSV. 
 
 First, it reads in the csv files created in the get_data. It then loops through them, filling in missing data, calculating the percentage of the population that's white nonhispanic and the percentage of the population over 25 that has a bachelor's degree or higher. 
