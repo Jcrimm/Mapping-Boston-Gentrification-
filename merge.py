@@ -17,9 +17,7 @@ gent = pd.read_csv("gent_by_block_grp.csv",dtype={"GEOID":str})
 #read in geographic data
 boston = gpd.read_file("boston.gpkg",layer="master")
 
-
 #%% Now merge the two datafiles together
-
 merged = boston.merge(gent,
                       on="GEOID",
                       how="left",

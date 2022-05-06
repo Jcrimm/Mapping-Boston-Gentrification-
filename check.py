@@ -37,14 +37,14 @@ gent["rank2"] = range(1,len(gent)+1)
 #%% How are the two indexes correlated?
 
 #pearson
-trim = gent[['gent_index(w/race)','gent_index(norace)']]
-corr = trim.corr(method='pearson')
-print(f"The Pearson Correlation btwn Indexes: {corr}")
+trim = gent[['rank1','rank2']]
+corr_pearson = trim.corr(method='pearson')
+print(f"The Pearson Correlation btwn Indexes: {corr_pearson}")
 
 #use spearman
 trim = gent[['rank1','rank2']]
 corr_spearman = trim.corr(method='spearman')
-print(f"The Spearman Correlation btwn Indexes: {corr}")
+print(f"The Spearman Correlation btwn Indexes: {corr_spearman}")
 
 #%% plot the correlation
 plt.rcParams['figure.dpi'] = 300

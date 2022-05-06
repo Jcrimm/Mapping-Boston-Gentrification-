@@ -12,7 +12,7 @@ import geopandas as gpd
 #%% Read in files
 
 # read in places file
-city = gpd.read_file("cb_2019_25_place_500k.zip",dtype=str)
+city = gpd.read_file("City_of_Boston_Boundary.zip",dtype=str)
 
 #bring in block groups data
 block_grps = gpd.read_file("cb_2019_25_bg_500k.zip",dtype=str)
@@ -27,10 +27,6 @@ utm18n = 26986
 city = city.to_crs(epsg=utm18n)
 block_grps = block_grps.to_crs(epsg=utm18n)
 
-
-#%% Keep just the boston city geography for the underlying layer
-city = city.query("GEOID =='2507000'")
-
 #%% Join the block groups and city geographic data
 #then clip the block group data on the city data to create the city boundary
 
@@ -41,27 +37,25 @@ overlaps = block_grps.sjoin(city,how="inner",predicate="overlaps")
 #then do a spatial join for all block_grps that are within the city
 within = block_grps.sjoin(city,how="inner",predicate="within")
 
-#Select only the rows for Boston. How many in each group? 
-within_boston = within.query("GEOID_right=='2507000'")
-print(f"Number of Block groups within Boston: {len(within_boston)}")
-overlap_boston = overlaps.query("GEOID_right=='2507000'")
-print(f"Number of Block groups overlapping Boston: {len(overlap_boston)}")
-
 #concacanate the two dataframes together
-#result is all tracts that are within or overlap with Boston
-blckgrp_list = [within_boston,overlap_boston]
+#result is all block groups that are within or overlap with Boston
+blckgrp_list = [overlaps,within]
+#blckgrp_list = [within_boston,overlap_boston]
 boston_grps = pd.concat(blckgrp_list)
 
 # Now clip the boston_grps on the city boundary data
-#boston clips the boston_grps with the city file
 boston = boston_grps.clip(city,keep_geom_type=True)
 
 #%% Keep just the data from the block groups dataset and rename columns
-keep = ["GEOID_left","ALAND_left","AWATER_left",'geometry']
+
+#create list for the columns we want to keep
+keep = ["GEOID","ALAND","AWATER",'geometry']
+
+#keep = ["GEOID_left","ALAND_left","AWATER_left",'geometry']
 boston = boston[keep]
 
 #rename the columns
-boston = boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":"ALAND","AWATER_left":"AWATER"})
+#boston = boston.rename(columns={"GEOID_left":"GEOID","ALAND_left":"ALAND","AWATER_left":"AWATER"})
 
 #resent index and then set index to GEOID. Drop the old index 
 boston = boston.reset_index()

@@ -9,7 +9,7 @@ Created on Wed Apr 20 09:53:57 2022
 import pandas as pd
 import numpy as np
 
-# Bring in 2014 & 2019 data. We'll convert to strings later on
+# Bring in 2014 & 2019 data. We'll convert to floats later on
 data14 = pd.read_csv("Suffolk_blckgrps_2014.csv",dtype=str)
 data19 = pd.read_csv("Suffolk_blckgrps_2019.csv",dtype=str)
 

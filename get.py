@@ -25,7 +25,7 @@ import requests
     # "B15003_024E" : professional degree
     # "B15003_025E" : doctoral degree
 
-#Create a list of all the variables we want, exluding education.
+#Create a list of all the variables we want.
 var_list = ["NAME","B01001_001E","B03002_002E","B19013_001E","B25064_001E","B15003_001E","B15003_022E","B15003_023E","B15003_024E","B15003_025E"]
 
 #create a string for all the variables
