@@ -1,9 +1,9 @@
 # **Mapping Gentrification in Boston: 2010-2019**
 
 ## **Executive Summary**
-Over the last decade, major U.S. cities experienced large population growth, as well as more diverse. Boston Massachusetts is no exception: between 2010 and 2019, its population grew 9.4% and saw increases in nonwhite populations ([Hey, 2021](https://www.brookings.edu/research/2020-census-big-cities-grew-and-became-more-diverse-especially-among-their-youth/)). However, other studies have highlighted increasing income inequality and rising housing costs in the Boston metropolitan area ([Herman, Luberoff, Mccue, 2019](https://www.jchs.harvard.edu/sites/default/files/Harvard_JCHS_mapping_neighborhood_change_boston_january_2019.pdf)). Taken together, there have been large concerns about gentrification within Boston. Gentrification is a process of change in historically disinvested neighborhoods along economic lines, including real estate investment and higher-income households moving in, as well as changes in racial and educational attainment levels as well ([Urban Displacement Project at U.S. Berkely](https://www.urbandisplacement.org/about/what-are-gentrification-and-displacement/)). 
+Over the last decade, major U.S. cities experienced large population growth and demographic change. Boston Massachusetts is no exception: between 2010 and 2019, its population grew 9.4% and saw increases in nonwhite populations ([Hey, 2021](https://www.brookings.edu/research/2020-census-big-cities-grew-and-became-more-diverse-especially-among-their-youth/)). However, other studies have highlighted increasing income inequality and rising housing costs in the Boston metropolitan area ([Herman, Luberoff, Mccue, 2019](https://www.jchs.harvard.edu/sites/default/files/Harvard_JCHS_mapping_neighborhood_change_boston_january_2019.pdf)). Taken together, there have been large concerns about gentrification within Boston. Gentrification is a process of change in historically disinvested neighborhoods along economic lines, including real estate investment and higher-income households moving in, as well as changes in racial and educational attainment levels as well ([Urban Displacement Project at U.S. Berkely](https://www.urbandisplacement.org/about/what-are-gentrification-and-displacement/)). 
 
-This project looks to visualize gentrification in Boston over the last decade. Its main output is a heatmap of gentrification in Boston at the block group level using a "gentrification index" (see details on methodology below). It can also be used to create a second map highlighting changes in low-income block groups, those whose median income were below the 2010 citywide median income of $49,893 ([Boston's People and Economy](https://www.boston.gov/sites/default/files/embed/f/fy16-volume1-bostons-people-economy.pdf)).
+This project looks to visualize gentrification in Boston over the last decade. Its main output is a heatmap of gentrification in Boston at the block group level using a "gentrification index" (see details on methodology below). It also creates a second map highlighting changes in low-income block groups, those whose median income were below the 2010 citywide median income of $49,893 ([Boston's People and Economy](https://www.boston.gov/sites/default/files/embed/f/fy16-volume1-bostons-people-economy.pdf)).
 The data sources for this project include the Census's American Community Survey (ACS) five-year esimates, as well as geospatial data from the U.S. Census and the City of Boston. The project also includes a graph that checks for the robustness of the gentrification index when the racial indicator is removed.
 
 ![Gentrification index in all block groups](Boston_Gentrification_All.png)
@@ -36,7 +36,7 @@ The script then loops through the years of interest, 2014 & 2019 in this case, r
 ### **Script #2: analyze**
 The script uses the two csv files created in the previous script to build the gentrification index. It then saves the result as a new CSV. 
 
-First, it reads in the csv files created in the get_data. It then loops through them, filling in missing data, calculating the percentage of the population that's white nonhispanic and the percentage of the population over 25 that has a bachelor's degree or higher. 
+First, it reads in the csv files created in the first script. It then loops through them, filling in missing data, calculating the percentage of the population that's white nonhispanic and the percentage of the population over 25 that has a bachelor's degree or higher. 
 
 The script then builds a new dataframe, joined, that's the percentage change between the 2014 and 2019 datasets for the following variables for each block group. 
 1. Percentage of the population that's nonwhite hispanic
@@ -49,16 +49,20 @@ Next, it loops through each column in joined, creating quintiles for each variab
 Finally, the script writes the quint dataframe to a csv file called "gent_by_blck_grp.csv".
 
 ### **Script #3: filter**
-This script builds the geographic data needed for the map and saves it to a geopackage. The two main inputs are two shapefiles: "City_of_Boston_Boundary.zip," which contains geospatial data for the city of Boston, and "cb_2019_25_bg_500k.zip," which contains geospatial data for all block groups in Massachusetts. Both are provided in the repository. However, the boston boundary file can be downloaded from the [City of Boston's website](https://bostonopendata-boston.opendata.arcgis.com/datasets/boston::city-of-boston-boundary/explore?location=42.293424%2C-71.084336%2C12.11) and the block group data can be downloaded from the [Census's website](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html).
+This script builds the geographic data needed for the map and saves it to a geopackage. The two main inputs are two shapefiles: 
+1. *"City_of_Boston_Boundary.zip"*: contains geospatial data for the city of Boston, and 
+2. *"cb_2019_25_bg_500k.zip"*: contains geospatial data for all block groups in Massachusetts. 
+
+Both are provided in the repository. However, the boston boundary file can be downloaded from the [City of Boston's website](https://bostonopendata-boston.opendata.arcgis.com/datasets/boston::city-of-boston-boundary/explore?location=42.293424%2C-71.084336%2C12.11) and the block group data can be downloaded from the [Census's website](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html).
 
 After reading in the data, the script projects both the city and block group data to utm18n, the projection used for Massachusetts ([State of Massachusetts](https://www.mass.gov/info-details/overview-of-massgis-data)). 
 
-The script then executes two spatial joins: one with a overlaps predicate and one with a within predicate. Then it concatenates the resulting dataframes. The result is a dataframe, boston_grps, that contains all block groups that are either fully within or overlap the city of Boston. The script then clips the block groups on the city boundary data, resulting in a dataframe named boston that divides the city into block groups. 
+The script then executes two spatial joins: one with a overlaps predicate and one with a within predicate. Then it concatenates the resulting dataframes. The result is a new dataframe, boston_grps, that contains all block groups that are either fully within or overlap the city of Boston. The script then clips the block groups on the city boundary data, resulting in a dataframe named boston that divides the city into block groups. 
 
 Finally, the script creates a geopackage called boston with two layers. The first layer, city, is the boston boundary data. The second, master, is the clipped block group data. 
 
 ### **Script #4: merge**
-merge has two inputs: the "gent_by_blck_grp.csv" created in script #2 and the master layer of the boston geopackage created in script #3. After reading in the data, the script joins the gentrification index data onto the geospatial data using GEOID as the key. It then writes the merged data to a new layer of the boston geopackage called "gent," as well as a new csv file called "boston_gent.csv" 
+merge has two inputs: the "gent_by_blck_grp.csv" created in the second script and the master layer of the boston geopackage created in the third script. After reading in the data, the script joins the gentrification index data onto the geospatial data using GEOID as the key. It then writes the merged data to a new layer of the boston geopackage called "gent," as well as a new csv file called "boston_gent.csv" 
 
 ### **Script #5: check**
 This script checks the robustness of the gentrification by plotting the two indexes and fitting a linear regression line using the "boston_gent.csv" file created in the previous script. 
